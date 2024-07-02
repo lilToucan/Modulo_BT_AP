@@ -1,7 +1,4 @@
-using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
-using UnityEngine.AI;
 using BT.Process;
 
 namespace BT
@@ -100,11 +97,46 @@ namespace BT
                 return Status.Failure;
             }
         }
+
         public override void AddChild(Node _ChildNode)
         {
             base.AddChild(_ChildNode);
         }
 
+        public override void Reset()
+        {
+            base.Reset();
+        }
+    }
+
+    public class Selector : Node
+    {
+        public Selector(string _Name) : base(_Name)
+        {
+        }
+
+        public override void AddChild(Node _ChildNode)
+        {
+            base.AddChild(_ChildNode);
+        }
+        public override Status Process()
+        {
+            if (CurrentChild >= Children.Count)
+                return Status.Failure;
+
+            var _ChildProcess = Children[CurrentChild].Process();
+            
+            if(_ChildProcess != Status.Failure)
+            {
+                return _ChildProcess;
+            }
+            else
+            {
+                Reset();
+                CurrentChild++;
+                return Status.Running;
+            }
+        }
         public override void Reset()
         {
             base.Reset();
