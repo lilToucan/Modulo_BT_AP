@@ -71,7 +71,7 @@ namespace BT.Process
     {
         // given variables:
         NavMeshAgent agent;
-        GameObject target;
+        ITarget target;
         float stopDist;
         public delegate void RemoveBar();
         event RemoveBar removeBar;
@@ -90,7 +90,7 @@ namespace BT.Process
         //    distance = distance
         //}
 
-        public GoTo_Process(GameObject _Target, NavMeshAgent _Agent, float _StopDist, float _Distance ,RemoveBar _RemoveBar) : base()
+        public GoTo_Process(ITarget _Target, NavMeshAgent _Agent, float _StopDist, float _Distance ,RemoveBar _RemoveBar) : base()
         {
             stopDist = _StopDist;
             target = _Target;
@@ -110,7 +110,7 @@ namespace BT.Process
             if (status != Node.Status.Success)
                 return status;
 
-            agent.SetDestination(target.transform.position);
+            agent.SetDestination(target.MyGameObject.transform.position);
 
             distance = agent.remainingDistance;
 

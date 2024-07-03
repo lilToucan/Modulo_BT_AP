@@ -10,7 +10,7 @@ namespace BT.Decorator
 
     }
 
-    public class CheckBarDecorator : IDecorator
+    public class CheckBar_Decorator : IDecorator
     {
         float currentBarValue;
         float minBarValue;
@@ -22,7 +22,7 @@ namespace BT.Decorator
         event GetValue getCurrentValue;
         public List<IDecorator> decorators { get; set; }
 
-        public CheckBarDecorator(GetValue _GetCurrentValue, float _MinBarValue, float _Distance, float _BarUsedPerDist, Node _Node)
+        public CheckBar_Decorator(GetValue _GetCurrentValue, float _MinBarValue, float _Distance, float _BarUsedPerDist, Node _Node)
         {
             getCurrentValue = _GetCurrentValue;
 
@@ -41,7 +41,7 @@ namespace BT.Decorator
 
         public Node.Status Process()
         {
-            currentBarValue = (float) getCurrentValue?.Invoke();
+            currentBarValue = (float)getCurrentValue?.Invoke();
             if (currentBarValue <= minBarValue || currentBarValue <= totBareUsed)
             {
                 return node.Process();
@@ -60,54 +60,62 @@ namespace BT.Decorator
     public class CalculateDistance_Decorator : IDecorator
     {
         public delegate void GiveDistance(float value);
-        public delegate void GiveTarget(GameObject target);
+        public delegate void GiveTarget(ITarget target);
         event GiveDistance giveDistance;
         event GiveTarget giveTarget;
         List<ITarget> trees = new();
-        GameObject target = null;
+        ITarget target = null;
         NavMeshAgent agent;
 
 
-        public CalculateDistance_Decorator(GiveDistance _GiveDistance, GiveTarget _GiveTarget,List<ITarget> _Trees,NavMeshAgent _Agent)
+        public CalculateDistance_Decorator(GiveDistance _GiveDistance, GiveTarget _GiveTarget, List<ITarget> _Trees, NavMeshAgent _Agent)
         {
             giveDistance = _GiveDistance;
             giveTarget = _GiveTarget;
+
+            trees = new();
             trees = _Trees;
             agent = _Agent;
         }
 
         public CalculateDistance_Decorator(GiveDistance _GiveDistance, GiveTarget _GiveTarget, ITarget _Target, NavMeshAgent _Agent)
-        { 
+        {
             giveDistance = _GiveDistance;
             giveTarget = _GiveTarget;
-            trees.Add(_Target);
+            trees = new() { _Target };
             agent = _Agent;
         }
 
         public List<IDecorator> decorators { get; set; }
 
         public void AddDecorator(IDecorator _Decorator)
-        {}
+        { }
 
         public Node.Status Process()
         {
             if (trees.Count <= 0)
                 return Node.Status.Failure;
 
-            int rand = Random.Range(0, trees.Count);
-            if (trees[rand].MyGameObject.activeInHierarchy == false)
+            if (target == null)
             {
-                return Node.Status.Running;
+                int rand = Random.Range(0, trees.Count);
+                if (trees[rand].MyGameObject.activeInHierarchy == false)
+                {
+                    return Node.Status.Running;
+                }
+
+                target = trees[rand];
+               //Debug.Log(target.MyGameObject.name, target.MyGameObject);
             }
 
-            target = trees[rand].MyGameObject;
-
             if (target == null)
+            {
                 return Node.Status.Failure;
+            }
 
             giveTarget?.Invoke(target);
 
-            agent.SetDestination(target.transform.position);
+            agent.SetDestination(target.MyGameObject.transform.position);
             var dist = agent.remainingDistance;
             agent.SetDestination(agent.transform.position);
 

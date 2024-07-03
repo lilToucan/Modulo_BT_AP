@@ -78,9 +78,9 @@ namespace BT
         {
             if(CurrentChild >= Children.Count)
             {
-                Reset();
                 return Status.Success;
             }
+
             var childStatus = Children[CurrentChild].Process();
             if (childStatus == Status.Success)
             {
@@ -93,7 +93,6 @@ namespace BT
             }
             else
             {
-                Reset();
                 return Status.Failure;
             }
         }
