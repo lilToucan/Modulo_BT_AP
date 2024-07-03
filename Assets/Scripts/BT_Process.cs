@@ -70,58 +70,35 @@ namespace BT.Process
     public class GoTo_Process : BaseProcess
     {
         // given variables:
-        List<GameObject> targets;
         NavMeshAgent agent;
         GameObject target;
         float stopDist;
         public delegate void RemoveBar();
         event RemoveBar removeBar;
+        float distance;
 
         // private variables:
         float lastDist;
-        float dist;
 
-        public GoTo_Process(List<GameObject> _Targets, NavMeshAgent _Agent, IDecorator _Decorator, float _StopDist,RemoveBar _RemoveBar ) : base()
-        {
-            int indexTargets = 0;
-            stopDist = _StopDist;
-            targets = _Targets;
-            agent = _Agent;
-            removeBar = _RemoveBar;
-            decorators = new() { _Decorator };
+        //public GoTo_Process(List<ITarget> _Targets, NavMeshAgent _Agent, IDecorator _Decorator, float _StopDist,RemoveBar _RemoveBar ) : base()
+        //{
+        //    stopDist = _StopDist;
+        //    targets = _Targets;
+        //    agent = _Agent;
+        //    removeBar = _RemoveBar;
+        //    decorators = new() { _Decorator };
+        //    distance = distance
+        //}
 
-            int rand = Random.Range(0, _Targets.Count);
-            while (targets[rand].activeInHierarchy == false)
-            {
-                rand = Random.Range(0, _Targets.Count);
-                indexTargets++;
-                if (indexTargets >= targets.Count)
-                {
-                    targets[0].SetActive(true);
-                    target = targets[0];
-                    break;
-                }
-            }
-            target = targets[rand];
-
-            agent.SetDestination(target.transform.position);
-            dist = agent.remainingDistance;
-            lastDist = dist;
-            agent.SetDestination(agent.transform.position);
-        }
-
-        public GoTo_Process(GameObject _Target, NavMeshAgent _Agent, IDecorator _Decorator, float _StopDist, RemoveBar _RemoveBar) : base()
+        public GoTo_Process(GameObject _Target, NavMeshAgent _Agent, float _StopDist, float _Distance ,RemoveBar _RemoveBar) : base()
         {
             stopDist = _StopDist;
             target = _Target;
             agent = _Agent;
             removeBar = _RemoveBar;
-            decorators = new() { _Decorator };
-
-            agent.SetDestination(target.transform.position);
-            dist = agent.remainingDistance;
-            lastDist = dist;
-            agent.SetDestination(agent.transform.position);
+            decorators = new();
+            distance = _Distance;
+            lastDist = distance;
         }
 
         public override Node.Status Process()
@@ -135,16 +112,16 @@ namespace BT.Process
 
             agent.SetDestination(target.transform.position);
 
-            dist = agent.remainingDistance;
+            distance = agent.remainingDistance;
 
-            if(lastDist-dist >= 1)
+            if(lastDist-distance >= 1)
             {
-                lastDist = dist;
+                lastDist = distance;
                 removeBar?.Invoke();
             }
             
 
-            if (dist <= stopDist)
+            if (distance <= stopDist)
                 status = Node.Status.Success;
             else
                 status = Node.Status.Running;

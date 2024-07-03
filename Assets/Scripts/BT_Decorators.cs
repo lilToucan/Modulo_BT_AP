@@ -57,19 +57,18 @@ namespace BT.Decorator
         }
     }
 
-    public class CalculateTarget_Decorator : IDecorator
+    public class CalculateDistance_Decorator : IDecorator
     {
         public delegate void GiveDistance(float value);
         public delegate void GiveTarget(GameObject target);
         event GiveDistance giveDistance;
         event GiveTarget giveTarget;
-        event GiveTarget getTarget;
         List<ITarget> trees = new();
         GameObject target = null;
         NavMeshAgent agent;
 
 
-        public CalculateTarget_Decorator(GiveDistance _GiveDistance, GiveTarget _GiveTarget,List<ITarget> _Trees,NavMeshAgent _Agent)
+        public CalculateDistance_Decorator(GiveDistance _GiveDistance, GiveTarget _GiveTarget,List<ITarget> _Trees,NavMeshAgent _Agent)
         {
             giveDistance = _GiveDistance;
             giveTarget = _GiveTarget;
@@ -77,7 +76,7 @@ namespace BT.Decorator
             agent = _Agent;
         }
 
-        public CalculateTarget_Decorator(GiveDistance _GiveDistance, GiveTarget _GiveTarget, ITarget _Target, NavMeshAgent _Agent)
+        public CalculateDistance_Decorator(GiveDistance _GiveDistance, GiveTarget _GiveTarget, ITarget _Target, NavMeshAgent _Agent)
         { 
             giveDistance = _GiveDistance;
             giveTarget = _GiveTarget;
