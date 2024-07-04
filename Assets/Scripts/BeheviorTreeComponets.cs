@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using UnityEngine;
 using BT.Process;
 
 namespace BT
@@ -45,13 +46,14 @@ namespace BT
             if (CurrentChild < Children.Count)
             {
                 var status = Children[CurrentChild].Process();
-                if(status != Status.Success)
+                if (status != Status.Success)
                 {
                     return status;
                 }
 
                 // else 
                 CurrentChild++;
+                return Status.Running;
             }
 
             return Status.Success;
@@ -76,25 +78,25 @@ namespace BT
 
         public override Status Process()
         {
-            if(CurrentChild >= Children.Count)
+            if (CurrentChild >= Children.Count)
             {
                 return Status.Success;
             }
 
             var childStatus = Children[CurrentChild].Process();
+            //Debug.Log(childStatus);
             if (childStatus == Status.Success)
             {
                 CurrentChild++;
                 return Status.Running;
             }
-            else if(childStatus == Status.Running)
+            if (childStatus == Status.Running)
             {
                 return Status.Running;
             }
-            else
-            {
-                return Status.Failure;
-            }
+
+            return Status.Failure;
+
         }
 
         public override void AddChild(Node _ChildNode)
@@ -124,14 +126,13 @@ namespace BT
                 return Status.Failure;
 
             var _ChildProcess = Children[CurrentChild].Process();
-            
-            if(_ChildProcess != Status.Failure)
+
+            if (_ChildProcess != Status.Failure)
             {
                 return _ChildProcess;
             }
             else
             {
-                Reset();
                 CurrentChild++;
                 return Status.Running;
             }
@@ -166,6 +167,6 @@ namespace BT
             base.AddChild(_ChildNode);
         }
     }
-   
-    
+
+
 }

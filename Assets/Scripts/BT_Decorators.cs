@@ -18,20 +18,24 @@ namespace BT.Decorator
         float barUsedPerDist;
         float totBareUsed;
         Node node;
-        public delegate float GetValue();
-        event GetValue getCurrentValue;
+
         public List<IDecorator> decorators { get; set; }
+        float startValue;
+        bool cantReach = false;
 
-        public CheckBar_Decorator(GetValue _GetCurrentValue, float _MinBarValue, float _Distance, float _BarUsedPerDist, Node _Node)
+        public delegate float GetFloat();
+        event GetFloat getDistance;
+        event GetFloat getCurrentBarValue;
+
+        bool fistTime = true;
+
+        public CheckBar_Decorator(GetFloat _GetCurrentValue, float _MinBarValue, GetFloat _GetDistance, float _BarUsedPerDist, Node _Node)
         {
-            getCurrentValue = _GetCurrentValue;
-
+            getCurrentBarValue = _GetCurrentValue;
             minBarValue = _MinBarValue;
-            distance = _Distance;
+            getDistance = _GetDistance;
             barUsedPerDist = _BarUsedPerDist;
             node = _Node;
-
-            totBareUsed = (distance + 1) * barUsedPerDist;
         }
 
 
@@ -41,19 +45,54 @@ namespace BT.Decorator
 
         public Node.Status Process()
         {
-            currentBarValue = (float)getCurrentValue?.Invoke();
-            if (currentBarValue <= minBarValue || currentBarValue <= totBareUsed)
+            if (cantReach)
+                return NodeNullCheck();
+
+            if (fistTime)
             {
-                return node.Process();
+                fistTime = false;
+                startValue = (float)getCurrentBarValue?.Invoke();
+                distance = (float)getDistance?.Invoke();
+                totBareUsed = (distance + 1) * barUsedPerDist;
             }
 
+            if (startValue <= totBareUsed)
+            {
+                cantReach = true;
+                return Node.Status.Running;
+            }
+            //else 
+            currentBarValue = (float)getCurrentBarValue?.Invoke();
+            if (currentBarValue <= minBarValue)
+            {
+                cantReach = true;
+                return Node.Status.Running;
+            }
+            //else 
             return Node.Status.Success;
+
+
+            
+            
+        }
+
+        /// <summary>
+        /// node?.Process() else fail;
+        /// </summary>
+        /// <returns></returns>
+        Node.Status NodeNullCheck()
+        {
+            if (node != null)
+                return node.Process();
+
+            return Node.Status.Failure;
         }
 
         public void Reset()
         {
             totBareUsed = 0;
-            node = null;
+            fistTime = true; 
+            cantReach = false;
         }
     }
 

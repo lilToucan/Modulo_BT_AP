@@ -1,7 +1,6 @@
 using BT;
 using BT.Decorator;
 using BT.Process;
-using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
@@ -40,6 +39,7 @@ public class Jack : MonoBehaviour
 
     BehaviourTree treeDay;
     BehaviourTree treeNight;
+    BehaviourTree currentTree;
     NavMeshAgent agent;
     bool hasLog = false;
     Node.Status treeStatus = Node.Status.Running;
@@ -63,9 +63,10 @@ public class Jack : MonoBehaviour
     {
         if (treeStatus != Node.Status.Running)
         {
-            treeDay.Reset();
+            //Debug.Log(treeStatus);
+            currentTree.Reset();
         }
-        treeStatus = treeDay.Process();
+        treeStatus = currentTree.Process();
     }
 
     private void InizializeBT()
@@ -93,19 +94,19 @@ public class Jack : MonoBehaviour
         #endregion
 
         //Bars check:
-        CheckBar_Decorator hungerCheck = new(() => currentHunger, minHunger, distance, hungerUse, foodSequence);
-        CheckBar_Decorator thirstCheck = new(() => currentThirst, minThirst, distance, hungerUse, foodSequence);
+        CheckBar_Decorator hungerCheck = new(() => currentHunger, minHunger, () => distance, hungerUse, foodSequence);
+        CheckBar_Decorator thirstCheck = new(() => currentThirst, minThirst, () => distance, hungerUse, foodSequence);
 
 
         #region GoTo:
         //GoTo:
-        GoTo_Process goToTree = new(target, agent, stopDist, distance, DecreaseBars);
-        goToTree.AddDecorator(hungerCheck); goToTree.AddDecorator(thirstCheck);
-        GoTo_Process goToFood = new(foodPoint, agent, stopDist, distance, DecreaseBars);
-        GoTo_Process goToWater = new(waterPoint, agent, stopDist, distance, DecreaseBars);
-        GoTo_Process goToStack = new(stackPoint, agent, stopDist, distance, DecreaseBars);
-        GoTo_Process goToHome = new(homePoint, agent, stopDist, distance, DecreaseBars);
-        goToHome.AddDecorator(hungerCheck); goToHome.AddDecorator(thirstCheck);
+        GoTo_Process goToTree = new(() => target, agent, stopDist, () => distance, DecreaseBars);
+        //goToTree.AddDecorator(hungerCheck); goToTree.AddDecorator(thirstCheck);
+        GoTo_Process goToFood = new(() => foodPoint, agent, stopDist, () => distance, DecreaseBars);
+        GoTo_Process goToWater = new(() => waterPoint, agent, stopDist, () => distance, DecreaseBars);
+        GoTo_Process goToStack = new(() => stackPoint, agent, stopDist, () => distance, DecreaseBars);
+        GoTo_Process goToHome = new(() => homePoint, agent, stopDist, () => distance, DecreaseBars);
+        //goToHome.AddDecorator(hungerCheck); goToHome.AddDecorator(thirstCheck);
 
         //GoTo leafs:
         Leaf leaf_GoToTree = new("Going to tree", goToTree);
@@ -132,16 +133,20 @@ public class Jack : MonoBehaviour
         treeDay.AddChild(daySequence);
         daySequence.AddChild(leaf_DistanceToTree);
         daySequence.AddChild(leaf_GoToTree);
-        daySequence.AddChild(leaf_CutTree);
-        daySequence.AddChild(leaf_GoToStack);
+        //daySequence.AddChild(leaf_CutTree);
+        //daySequence.AddChild(leaf_GoToStack);
 
         //Food sequence:
         foodSequence.AddChild(leaf_DistanceToFood);
+        foodSequence.AddChild(leaf_GoToFood);
         foodSequence.AddChild(leaf_Eat);
 
         //Drink sequence:
         drinkSequence.AddChild(leaf_DistanceToWater);
+        drinkSequence.AddChild(leaf_GoToWater);
         drinkSequence.AddChild(leaf_Drink);
+
+        currentTree = treeDay;
     }
 
     private void OnDropLog()
@@ -179,6 +184,9 @@ public class Jack : MonoBehaviour
 
     private void GetTarget(ITarget _Target)
     {
+        //add line?
+        //add sound? 
+        //add my will to live? 
         target = _Target;
         //Debug.LogWarning(target.MyGameObject.name, target.MyGameObject);
     }
@@ -186,5 +194,6 @@ public class Jack : MonoBehaviour
     private void GetDistance(float value)
     {
         distance = value;
+        Debug.Log(distance);
     }
 }

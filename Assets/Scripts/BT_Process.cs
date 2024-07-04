@@ -31,6 +31,10 @@ namespace BT.Process
             status = Node.Status.Running;
         }
 
+        /// <summary>
+        /// all decorations processes
+        /// </summary>
+        /// <returns></returns>
         public virtual Node.Status Process()
         {
             status = Node.Status.Success;
@@ -51,7 +55,7 @@ namespace BT.Process
 
         public virtual void Reset()
         {
-            if (decorators.Count <= 0 )
+            if (decorators.Count <= 0)
                 return;
 
             foreach (var _decorator in decorators)
@@ -71,6 +75,13 @@ namespace BT.Process
     {
         // given variables:
         NavMeshAgent agent;
+
+        public delegate ITarget GetITarget();
+        GetITarget getTarget;
+
+        public delegate float GetFloat();
+        event GetFloat getDistance;
+
         ITarget target;
         float stopDist;
         public delegate void RemoveBar();
@@ -90,36 +101,55 @@ namespace BT.Process
         //    distance = distance
         //}
 
-        public GoTo_Process(ITarget _Target, NavMeshAgent _Agent, float _StopDist, float _Distance ,RemoveBar _RemoveBar) : base()
+        public GoTo_Process(GetITarget _GetTarget, NavMeshAgent _Agent, float _StopDist, GetFloat _GetDistance, RemoveBar _RemoveBar) : base()
         {
             stopDist = _StopDist;
-            target = _Target;
+            getTarget = _GetTarget;
             agent = _Agent;
             removeBar = _RemoveBar;
             decorators = new();
-            distance = _Distance;
-            lastDist = distance;
+            getDistance = _GetDistance;
+
         }
 
+        /// <summary>
+        /// goes to target
+        /// </summary>
+        /// <returns></returns>
         public override Node.Status Process()
         {
             if (target == null)
-                return Node.Status.Failure;
+            {
+                target = getTarget?.Invoke();
+                distance = (float)getDistance?.Invoke();
+                
+                agent.SetDestination(target.MyGameObject.transform.position);
+            }
 
-            status = base.Process();
+            //Debug.Log("Target != null");
+            status = base.Process();// all decorations processes
+            //Debug.Log(status);
             if (status != Node.Status.Success)
                 return status;
 
-            agent.SetDestination(target.MyGameObject.transform.position);
-
+            if (agent.remainingDistance <= 0)
+            {
+                return Node.Status.Running;
+            }
             distance = agent.remainingDistance;
+            
+            //Debug.LogError(target.MyGameObject.name, target.MyGameObject);
+            //Debug.LogError(agent.remainingDistance);
 
-            if(lastDist-distance >= 1)
+            Debug.LogError(Vector3.Distance(target.MyGameObject.transform.position, agent.transform.position) + "\n" + distance);
+
+            if (lastDist - distance >= 1)
             {
                 lastDist = distance;
                 removeBar?.Invoke();
             }
-            
+
+            Debug.LogWarning(distance + "\n" + stopDist);
 
             if (distance <= stopDist)
                 status = Node.Status.Success;
@@ -131,6 +161,9 @@ namespace BT.Process
 
         public override void Reset()
         {
+            target = null;
+            distance = 0;
+
             base.Reset();
         }
 
@@ -148,7 +181,7 @@ namespace BT.Process
 
         float timer;
 
-        public PerformingTask_Process(float _Duration) :base()
+        public PerformingTask_Process(float _Duration) : base()
         {
             duration = _Duration;
             task = null;
@@ -166,7 +199,7 @@ namespace BT.Process
             if (status != Node.Status.Success)
                 return status;
 
-            if(timer < duration)
+            if (timer < duration)
             {
                 timer += Time.deltaTime;
                 return Node.Status.Running;
