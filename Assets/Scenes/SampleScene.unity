@@ -421,7 +421,7 @@ Transform:
   m_GameObject: {fileID: 87967113}
   serializedVersion: 2
   m_LocalRotation: {x: 0.7120321, y: -0, z: -0, w: 0.70214707}
-  m_LocalPosition: {x: 0.90000105, y: -0.4699998, z: 0}
+  m_LocalPosition: {x: 0.9000006, y: -0.3379998, z: 1.1400003}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -537,7 +537,7 @@ Transform:
   m_GameObject: {fileID: 173374045}
   serializedVersion: 2
   m_LocalRotation: {x: 0.7120321, y: -0, z: -0, w: 0.70214707}
-  m_LocalPosition: {x: 0.099999905, y: 0.5, z: 0}
+  m_LocalPosition: {x: 0.09999943, y: 0.63199997, z: 1.1400003}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -836,7 +836,7 @@ Transform:
   m_GameObject: {fileID: 281912597}
   serializedVersion: 2
   m_LocalRotation: {x: 0.7120321, y: -0, z: -0, w: 0.70214707}
-  m_LocalPosition: {x: -0.9000001, y: -0.4699998, z: 0}
+  m_LocalPosition: {x: -0.9000006, y: -0.3379998, z: 1.1400003}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -924,7 +924,7 @@ Transform:
   m_GameObject: {fileID: 358736417}
   serializedVersion: 2
   m_LocalRotation: {x: 0.7120321, y: -0, z: -0, w: 0.70214707}
-  m_LocalPosition: {x: 0, y: -0.4699998, z: 0}
+  m_LocalPosition: {x: 0, y: -0.3379998, z: 1.1400003}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1007,7 +1007,7 @@ Transform:
   m_GameObject: {fileID: 434044109}
   serializedVersion: 2
   m_LocalRotation: {x: 0.7120321, y: -0, z: -0, w: 0.70214707}
-  m_LocalPosition: {x: 0.5999999, y: 0, z: 0}
+  m_LocalPosition: {x: 0.5999994, y: 0.132, z: 1.1400003}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1104,6 +1104,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 789515689}
     m_Modifications:
+    - target: {fileID: 190007249671422878, guid: fcba47ea9288f5a44afc1ff9a891368a, type: 3}
+      propertyPath: respawnTime
+      value: 30
+      objectReference: {fileID: 0}
     - target: {fileID: 3159929117778345265, guid: fcba47ea9288f5a44afc1ff9a891368a, type: 3}
       propertyPath: m_LocalPosition.x
       value: -23.354465
@@ -1175,7 +1179,7 @@ NavMeshObstacle:
   m_Enabled: 1
   serializedVersion: 3
   m_Shape: 1
-  m_Extents: {x: 0.5, y: 0.5, z: 0.5}
+  m_Extents: {x: 0.05, y: 0.2, z: 0.05}
   m_MoveThreshold: 0.1
   m_Carve: 1
   m_CarveOnlyStationary: 1
@@ -1484,6 +1488,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 789515689}
     m_Modifications:
+    - target: {fileID: 190007249671422878, guid: fcba47ea9288f5a44afc1ff9a891368a, type: 3}
+      propertyPath: respawnTime
+      value: 30
+      objectReference: {fileID: 0}
     - target: {fileID: 3159929117778345265, guid: fcba47ea9288f5a44afc1ff9a891368a, type: 3}
       propertyPath: m_LocalPosition.x
       value: -39.54148
@@ -1700,7 +1708,7 @@ GameObject:
   - component: {fileID: 814202262}
   - component: {fileID: 814202261}
   m_Layer: 0
-  m_Name: Water (1)
+  m_Name: Home
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1812,6 +1820,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 789515689}
     m_Modifications:
+    - target: {fileID: 190007249671422878, guid: fcba47ea9288f5a44afc1ff9a891368a, type: 3}
+      propertyPath: respawnTime
+      value: 30
+      objectReference: {fileID: 0}
     - target: {fileID: 3159929117778345265, guid: fcba47ea9288f5a44afc1ff9a891368a, type: 3}
       propertyPath: m_LocalPosition.x
       value: -39.54148
@@ -1980,7 +1992,7 @@ NavMeshObstacle:
   m_Enabled: 1
   serializedVersion: 3
   m_Shape: 1
-  m_Extents: {x: 0.5, y: 0.5, z: 0.5}
+  m_Extents: {x: 0.05, y: 0.2, z: 0.05}
   m_MoveThreshold: 0.1
   m_Carve: 1
   m_CarveOnlyStationary: 1
@@ -2096,9 +2108,9 @@ Transform:
   m_GameObject: {fileID: 1232020611}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 7.9, y: 0, z: 6.57}
+  m_LocalPosition: {x: 7.9, y: -0.066, z: 6}
   m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
+  m_ConstrainProportionsScale: 1
   m_Children:
   - {fileID: 281912601}
   - {fileID: 358736421}
@@ -2118,11 +2130,11 @@ NavMeshObstacle:
   m_Enabled: 1
   serializedVersion: 3
   m_Shape: 1
-  m_Extents: {x: 1.5, y: 1.25, z: 1}
+  m_Extents: {x: 1, y: 0.5, z: 0.755}
   m_MoveThreshold: 0.1
   m_Carve: 1
-  m_CarveOnlyStationary: 0
-  m_Center: {x: 0, y: 0, z: 0}
+  m_CarveOnlyStationary: 1
+  m_Center: {x: 0, y: 0, z: 1.18}
   m_TimeToStationary: 0.5
 --- !u!114 &1232020614
 MonoBehaviour:
@@ -2585,6 +2597,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 789515689}
     m_Modifications:
+    - target: {fileID: 190007249671422878, guid: fcba47ea9288f5a44afc1ff9a891368a, type: 3}
+      propertyPath: respawnTime
+      value: 30
+      objectReference: {fileID: 0}
     - target: {fileID: 3159929117778345265, guid: fcba47ea9288f5a44afc1ff9a891368a, type: 3}
       propertyPath: m_LocalPosition.x
       value: -23.354465
@@ -2660,6 +2676,7 @@ GameObject:
   - component: {fileID: 1717077016}
   - component: {fileID: 1717077020}
   - component: {fileID: 1717077021}
+  - component: {fileID: 1717077022}
   m_Layer: 0
   m_Name: Jack
   m_TagString: Untagged
@@ -2779,10 +2796,10 @@ MonoBehaviour:
   minThirst: 10
   maxThirst: 50
   thirstUse: 0.3
-  stopDist: 0.4
+  stopDist: 0.6
   eatDur: 0.5
   drinkDur: 0.5
-  treeCutDur: 1
+  treeCutDur: 0.1
 --- !u!195 &1717077021
 NavMeshAgent:
   m_ObjectHideFlags: 0
@@ -2793,11 +2810,11 @@ NavMeshAgent:
   m_Enabled: 1
   m_AgentTypeID: 0
   m_Radius: 0.5
-  m_Speed: 10
-  m_Acceleration: 100
+  m_Speed: 20
+  m_Acceleration: 1000
   avoidancePriority: 50
-  m_AngularSpeed: 120
-  m_StoppingDistance: 0
+  m_AngularSpeed: 1200
+  m_StoppingDistance: 0.3
   m_AutoTraverseOffMeshLink: 1
   m_AutoBraking: 1
   m_AutoRepath: 1
@@ -2805,6 +2822,33 @@ NavMeshAgent:
   m_BaseOffset: 1
   m_WalkableMask: 4294967295
   m_ObstacleAvoidanceType: 4
+--- !u!54 &1717077022
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1717077015}
+  serializedVersion: 4
+  m_Mass: 1
+  m_Drag: 0
+  m_AngularDrag: 0.05
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 0
+  m_IsKinematic: 0
+  m_Interpolate: 0
+  m_Constraints: 0
+  m_CollisionDetection: 0
 --- !u!1 &1772276904
 GameObject:
   m_ObjectHideFlags: 0
@@ -2938,7 +2982,7 @@ NavMeshObstacle:
   m_Enabled: 1
   serializedVersion: 3
   m_Shape: 1
-  m_Extents: {x: 0.5, y: 0.5, z: 0.5}
+  m_Extents: {x: 0.05, y: 0.2, z: 0.05}
   m_MoveThreshold: 0.1
   m_Carve: 1
   m_CarveOnlyStationary: 1
@@ -3021,7 +3065,7 @@ Transform:
   m_GameObject: {fileID: 1937987615}
   serializedVersion: 2
   m_LocalRotation: {x: 0.7120321, y: -0, z: -0, w: 0.70214707}
-  m_LocalPosition: {x: -0.5000005, y: 0, z: 0}
+  m_LocalPosition: {x: -0.50000095, y: 0.132, z: 1.1400003}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -3042,7 +3086,7 @@ NavMeshObstacle:
   m_Enabled: 1
   serializedVersion: 3
   m_Shape: 1
-  m_Extents: {x: 0.5, y: 0.5, z: 0.5}
+  m_Extents: {x: 0.05, y: 0.2, z: 0.05}
   m_MoveThreshold: 0.1
   m_Carve: 1
   m_CarveOnlyStationary: 1
@@ -3056,6 +3100,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 789515689}
     m_Modifications:
+    - target: {fileID: 190007249671422878, guid: fcba47ea9288f5a44afc1ff9a891368a, type: 3}
+      propertyPath: respawnTime
+      value: 30
+      objectReference: {fileID: 0}
     - target: {fileID: 3159929117778345265, guid: fcba47ea9288f5a44afc1ff9a891368a, type: 3}
       propertyPath: m_LocalPosition.x
       value: -30.1
@@ -3127,7 +3175,7 @@ NavMeshObstacle:
   m_Enabled: 1
   serializedVersion: 3
   m_Shape: 1
-  m_Extents: {x: 0.5, y: 0.5, z: 0.5}
+  m_Extents: {x: 0.05, y: 0.2, z: 0.05}
   m_MoveThreshold: 0.1
   m_Carve: 1
   m_CarveOnlyStationary: 1

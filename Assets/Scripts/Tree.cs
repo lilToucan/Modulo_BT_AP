@@ -4,6 +4,9 @@ using UnityEngine;
 public class Tree : MonoBehaviour, ITarget
 {
     public GameObject MyGameObject { get => gameObject; }
+    public MeshRenderer MeshRenderer { get => myRenderer; }
+
+    [SerializeField] float respawnTime;
     MeshRenderer myRenderer;
 
     private void Awake()
@@ -18,7 +21,7 @@ public class Tree : MonoBehaviour, ITarget
     private IEnumerator Respawn()
     {
         myRenderer.enabled = false;
-        yield return new WaitForSeconds(2);
+        yield return new WaitForSeconds(respawnTime);
         myRenderer.enabled = true;
     }
 }
@@ -27,5 +30,6 @@ public class Tree : MonoBehaviour, ITarget
 public interface ITarget
 {
     GameObject MyGameObject { get; }
+    MeshRenderer MeshRenderer { get; }
     void Interact();
 }

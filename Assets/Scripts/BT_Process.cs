@@ -122,7 +122,7 @@ namespace BT.Process
             {
                 target = getTarget?.Invoke();
                 distance = (float)getDistance?.Invoke();
-                
+
                 agent.SetDestination(target.MyGameObject.transform.position);
             }
 
@@ -136,8 +136,13 @@ namespace BT.Process
             {
                 return Node.Status.Running;
             }
-            distance = agent.remainingDistance;
-            
+
+            distance = Vector3.Distance // basicli distance of agent to target but no y
+            (
+                agent.transform.position - Vector3.up * agent.transform.position.y,
+                target.MyGameObject.transform.position - Vector3.up * target.MyGameObject.transform.position.y
+            );
+
             //Debug.LogError(target.MyGameObject.name, target.MyGameObject);
             //Debug.LogError(agent.remainingDistance);
 
@@ -216,6 +221,7 @@ namespace BT.Process
         }
         public override void Reset()
         {
+            timer = 0;
             base.Reset();
         }
     }

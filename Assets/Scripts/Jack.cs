@@ -125,6 +125,7 @@ public class Jack : MonoBehaviour
 
         //Performing task leafs:
         Leaf leaf_CutTree = new("cutting tree", cutTree);
+        Leaf leaf_DropLog = new("drop log", dropLog);
         Leaf leaf_Eat = new("Eating", eat);
         Leaf leaf_Drink = new("Drinking", drink);
         #endregion
@@ -133,8 +134,9 @@ public class Jack : MonoBehaviour
         treeDay.AddChild(daySequence);
         daySequence.AddChild(leaf_DistanceToTree);
         daySequence.AddChild(leaf_GoToTree);
-        //daySequence.AddChild(leaf_CutTree);
-        //daySequence.AddChild(leaf_GoToStack);
+        daySequence.AddChild(leaf_CutTree);
+        daySequence.AddChild(leaf_GoToStack);
+        daySequence.AddChild(leaf_DropLog);
 
         //Food sequence:
         foodSequence.AddChild(leaf_DistanceToFood);
@@ -173,6 +175,10 @@ public class Jack : MonoBehaviour
     {
         hasLog = true;
         log.SetActive(true);
+        if (target == null)
+            Debug.Log("aaaaa");
+        Debug.Log(target.MyGameObject.name,target.MyGameObject);
+        target?.Interact();
 
     }
 
@@ -194,6 +200,5 @@ public class Jack : MonoBehaviour
     private void GetDistance(float value)
     {
         distance = value;
-        Debug.Log(distance);
     }
 }

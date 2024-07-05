@@ -4,8 +4,8 @@ using UnityEngine;
 
 public class Food : MonoBehaviour, ITarget
 {
-    public GameObject MyGameObject { get=> gameObject; }
-
+    public GameObject MyGameObject { get => gameObject; }
+    public MeshRenderer MeshRenderer { get => null; }
     public void Interact()
     {
         //play sound?

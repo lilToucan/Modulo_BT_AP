@@ -72,8 +72,8 @@ namespace BT.Decorator
             return Node.Status.Success;
 
 
-            
-            
+
+
         }
 
         /// <summary>
@@ -91,7 +91,7 @@ namespace BT.Decorator
         public void Reset()
         {
             totBareUsed = 0;
-            fistTime = true; 
+            fistTime = true;
             cantReach = false;
         }
     }
@@ -138,13 +138,13 @@ namespace BT.Decorator
             if (target == null)
             {
                 int rand = Random.Range(0, trees.Count);
-                if (trees[rand].MyGameObject.activeInHierarchy == false)
+                if (trees[rand].MeshRenderer.enabled == false)
                 {
                     return Node.Status.Running;
                 }
 
                 target = trees[rand];
-               //Debug.Log(target.MyGameObject.name, target.MyGameObject);
+                //Debug.Log(target.MyGameObject.name, target.MyGameObject);
             }
 
             if (target == null)
@@ -155,7 +155,9 @@ namespace BT.Decorator
             giveTarget?.Invoke(target);
 
             agent.SetDestination(target.MyGameObject.transform.position);
-            var dist = agent.remainingDistance;
+            Vector3 agentPos = agent.transform.position - Vector3.up * agent.transform.position.y;
+            Vector3 targetPos = target.MyGameObject.transform.position - Vector3.up * target.MyGameObject.transform.position.y;
+            var dist = Vector3.Distance(agentPos, targetPos); ;
             agent.SetDestination(agent.transform.position);
 
             giveDistance?.Invoke(dist);
