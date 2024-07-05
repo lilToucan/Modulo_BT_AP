@@ -154,7 +154,12 @@ namespace BT
 
         public override Status Process()
         {
-            ; return MyProcess.Process();
+            var processStatus = MyProcess.Process();
+            if (processStatus == Status.Success)
+            {
+                Debug.Log("H");
+            }
+            return MyProcess.Process();
         }
 
         public override void Reset()

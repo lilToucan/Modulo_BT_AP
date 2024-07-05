@@ -46,7 +46,13 @@ namespace BT.Decorator
         public Node.Status Process()
         {
             if (cantReach)
-                return NodeNullCheck();
+            {
+                var nodeStatus = NodeNullCheck();
+                if (nodeStatus == Node.Status.Success)
+                    Debug.Log("aaaaaaaaaaaaa");
+
+                return nodeStatus;
+            }
 
             if (fistTime)
             {
@@ -70,10 +76,6 @@ namespace BT.Decorator
             }
             //else 
             return Node.Status.Success;
-
-
-
-
         }
 
         /// <summary>
@@ -102,18 +104,18 @@ namespace BT.Decorator
         public delegate void GiveTarget(ITarget target);
         event GiveDistance giveDistance;
         event GiveTarget giveTarget;
-        List<ITarget> trees = new();
+        List<ITarget> targets = new();
         ITarget target = null;
         NavMeshAgent agent;
 
 
-        public CalculateDistance_Decorator(GiveDistance _GiveDistance, GiveTarget _GiveTarget, List<ITarget> _Trees, NavMeshAgent _Agent)
+        public CalculateDistance_Decorator(GiveDistance _GiveDistance, GiveTarget _GiveTarget, List<ITarget> _Targets, NavMeshAgent _Agent)
         {
             giveDistance = _GiveDistance;
             giveTarget = _GiveTarget;
 
-            trees = new();
-            trees = _Trees;
+            targets = new();
+            targets = _Targets;
             agent = _Agent;
         }
 
@@ -121,7 +123,8 @@ namespace BT.Decorator
         {
             giveDistance = _GiveDistance;
             giveTarget = _GiveTarget;
-            trees = new() { _Target };
+            targets = new();
+            targets.Add(_Target);
             agent = _Agent;
         }
 
@@ -132,18 +135,23 @@ namespace BT.Decorator
 
         public Node.Status Process()
         {
-            if (trees.Count <= 0)
+            if (targets.Count <= 0)
                 return Node.Status.Failure;
 
             if (target == null)
             {
-                int rand = Random.Range(0, trees.Count);
-                if (trees[rand].MeshRenderer.enabled == false)
+
+                int rand = Random.Range(0, targets.Count);
+                if (targets[rand].MeshRenderer != null)
                 {
-                    return Node.Status.Running;
+                    if (targets[rand].MeshRenderer.enabled == false)
+                    {
+                        return Node.Status.Running;
+                    }
+
                 }
 
-                target = trees[rand];
+                target = targets[rand];
                 //Debug.Log(target.MyGameObject.name, target.MyGameObject);
             }
 
@@ -155,8 +163,11 @@ namespace BT.Decorator
             giveTarget?.Invoke(target);
 
             agent.SetDestination(target.MyGameObject.transform.position);
-            Vector3 agentPos = agent.transform.position - Vector3.up * agent.transform.position.y;
-            Vector3 targetPos = target.MyGameObject.transform.position - Vector3.up * target.MyGameObject.transform.position.y;
+            Vector3 agentPos = agent.transform.position;
+            agentPos.y = 0;
+            Vector3 targetPos = target.MyGameObject.transform.position;
+            targetPos.y = 0;
+
             var dist = Vector3.Distance(agentPos, targetPos); ;
             agent.SetDestination(agent.transform.position);
 

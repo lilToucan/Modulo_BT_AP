@@ -37,19 +37,27 @@ namespace BT.Process
         /// <returns></returns>
         public virtual Node.Status Process()
         {
+            int i = 0;
             status = Node.Status.Success;
             if (decorators.Count > 0)
             {
-                foreach (var _decorator in decorators)
+                foreach (var _Decorator in decorators)
                 {
-                    var _DecProcess = _decorator.Process();
+                    var _DecProcess = _Decorator.Process();
 
                     if (_DecProcess != Node.Status.Success)
                     {
                         return _DecProcess;
                     }
+                    i++;
+                }
+
+                if(i >= decorators.Count)
+                {
+                    return Node.Status.Success;
                 }
             } //else:
+
             return status;
         }
 
@@ -122,31 +130,34 @@ namespace BT.Process
             {
                 target = getTarget?.Invoke();
                 distance = (float)getDistance?.Invoke();
-
+                lastDist = distance;
                 agent.SetDestination(target.MyGameObject.transform.position);
             }
 
-            //Debug.Log("Target != null");
-            status = base.Process();// all decorations processes
-            //Debug.Log(status);
+            // all decorations processes
+            status = base.Process();
+
             if (status != Node.Status.Success)
                 return status;
-
-            if (agent.remainingDistance <= 0)
+            else
             {
-                return Node.Status.Running;
+                target = getTarget?.Invoke();
+                Debug.Log("Successsssssss");
             }
+           
 
-            distance = Vector3.Distance // basicli distance of agent to target but no y
-            (
-                agent.transform.position - Vector3.up * agent.transform.position.y,
-                target.MyGameObject.transform.position - Vector3.up * target.MyGameObject.transform.position.y
-            );
+            Vector3 agentPos = agent.transform.position;
+            agentPos.y = 0;
+            Vector3 targetPos = target.MyGameObject.transform.position;
+            targetPos.y = 0;
 
-            //Debug.LogError(target.MyGameObject.name, target.MyGameObject);
-            //Debug.LogError(agent.remainingDistance);
+            distance = Vector3.Distance (agentPos,targetPos);
 
-            Debug.LogError(Vector3.Distance(target.MyGameObject.transform.position, agent.transform.position) + "\n" + distance);
+            //Debug.LogError(Vector3.Distance(target.MyGameObject.transform.position, agent.transform.position) + "\n" + distance);
+            //if (distance <= 0)
+            //{
+            //    return Node.Status.Running;
+            //}
 
             if (lastDist - distance >= 1)
             {

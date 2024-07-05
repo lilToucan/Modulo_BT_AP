@@ -5,9 +5,9 @@ public class Tree : MonoBehaviour, ITarget
 {
     public GameObject MyGameObject { get => gameObject; }
     public MeshRenderer MeshRenderer { get => myRenderer; }
+    MeshRenderer myRenderer;
 
     [SerializeField] float respawnTime;
-    MeshRenderer myRenderer;
 
     private void Awake()
     {

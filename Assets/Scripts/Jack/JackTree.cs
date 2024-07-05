@@ -1,11 +1,12 @@
 using BT;
 using BT.Decorator;
 using BT.Process;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 
-public class Jack : MonoBehaviour
+public class JackTree: MonoBehaviour
 {
     [Header("static points")]
     ITarget homePoint;  // sleep
@@ -17,22 +18,22 @@ public class Jack : MonoBehaviour
     List<ITarget> trees = new();
 
     [Header("Hunger Settings:")]
-    [SerializeField] float minHunger;
-    [SerializeField] float maxHunger;
-    [SerializeField] float hungerUse;
+    [SerializeField] public float minHunger;
+    [SerializeField] public float maxHunger;
+    [SerializeField] public float hungerUse;
 
     [Header("Thirst Settings:")]
-    [SerializeField] float minThirst;
-    [SerializeField] float maxThirst;
-    [SerializeField] float thirstUse;
+    [SerializeField] public float minThirst;
+    [SerializeField] public float maxThirst;
+    [SerializeField] public float thirstUse;
 
     [Header("Process Settings:")]
     [SerializeField] float stopDist;
     [SerializeField] float eatDur;
     [SerializeField] float drinkDur;
     [SerializeField] float treeCutDur;
-    float currentHunger;
-    float currentThirst;
+    public float currentHunger;
+    public float currentThirst;
 
     float distance;
     ITarget target;
@@ -44,6 +45,8 @@ public class Jack : MonoBehaviour
     bool hasLog = false;
     Node.Status treeStatus = Node.Status.Running;
 
+    Jack jack;
+    
     private void Awake()
     {
         agent = GetComponent<NavMeshAgent>();
@@ -52,10 +55,13 @@ public class Jack : MonoBehaviour
         waterPoint = FindObjectOfType<Water>();
         foodPoint = FindObjectOfType<Food>();
         homePoint = FindObjectOfType<Home>();
+        jack = GetComponent<Jack>();
     }
 
     private void Start()
     {
+        currentHunger = maxHunger;
+        currentThirst = maxThirst;
         InizializeBT();
     }
 
@@ -101,7 +107,7 @@ public class Jack : MonoBehaviour
         #region GoTo:
         //GoTo:
         GoTo_Process goToTree = new(() => target, agent, stopDist, () => distance, DecreaseBars);
-        //goToTree.AddDecorator(hungerCheck); goToTree.AddDecorator(thirstCheck);
+        goToTree.AddDecorator(hungerCheck); goToTree.AddDecorator(thirstCheck);
         GoTo_Process goToFood = new(() => foodPoint, agent, stopDist, () => distance, DecreaseBars);
         GoTo_Process goToWater = new(() => waterPoint, agent, stopDist, () => distance, DecreaseBars);
         GoTo_Process goToStack = new(() => stackPoint, agent, stopDist, () => distance, DecreaseBars);
@@ -138,16 +144,21 @@ public class Jack : MonoBehaviour
         daySequence.AddChild(leaf_GoToStack);
         daySequence.AddChild(leaf_DropLog);
 
+
+
         //Food sequence:
         foodSequence.AddChild(leaf_DistanceToFood);
         foodSequence.AddChild(leaf_GoToFood);
         foodSequence.AddChild(leaf_Eat);
+        foodSequence.AddChild(leaf_DistanceToTree);
+
+
 
         //Drink sequence:
         drinkSequence.AddChild(leaf_DistanceToWater);
         drinkSequence.AddChild(leaf_GoToWater);
         drinkSequence.AddChild(leaf_Drink);
-
+        drinkSequence.AddChild(leaf_DistanceToTree);
         currentTree = treeDay;
     }
 
@@ -164,20 +175,20 @@ public class Jack : MonoBehaviour
     private void OnDrink()
     {
         currentThirst = maxThirst;
+        jack.jackSo.barChanged?.Invoke();
     }
 
     private void OnEating()
     {
         currentHunger = maxHunger;
+        jack.jackSo.barChanged?.Invoke();
     }
 
     private void GetLog()
     {
         hasLog = true;
         log.SetActive(true);
-        if (target == null)
-            Debug.Log("aaaaa");
-        Debug.Log(target.MyGameObject.name,target.MyGameObject);
+
         target?.Interact();
 
     }
@@ -186,6 +197,11 @@ public class Jack : MonoBehaviour
     {
         currentHunger -= hungerUse;
         currentThirst -= thirstUse;
+        jack.jackSo.barChanged?.Invoke();
+        if(currentHunger <= 0 || currentThirst <= 0)
+        {
+            
+        }
     }
 
     private void GetTarget(ITarget _Target)
