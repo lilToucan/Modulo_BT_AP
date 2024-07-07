@@ -5,6 +5,7 @@ public class Clock : MonoBehaviour
 {
     [SerializeField] public float dayDur;
     [SerializeField] public float nightDur;
+    [SerializeField] GameObject Day, Night;
 
     float currentDur;
     float lastTime;
@@ -14,27 +15,28 @@ public class Clock : MonoBehaviour
 
     private void OnEnable()
     {
+        Day.SetActive(true);
         OnTimeChange += ChangeTimeDuration;
     }
     private void OnDisable()
     {
         OnTimeChange -= ChangeTimeDuration;
     }
-
-    private void ChangeTimeDuration()
-    {
-        if (IsDay)
-            currentDur = dayDur;
-        else
-            currentDur = nightDur;
-    }
-
     private void Start()
     {
         lastTime = Time.time;
         
         currentDur = dayDur;
     }
+
+    private void ChangeTimeDuration()
+    {
+        Day.SetActive(IsDay);
+        Night.SetActive(!IsDay);
+
+        currentDur = IsDay? dayDur : nightDur;
+    }
+
 
     private void Update()
     {

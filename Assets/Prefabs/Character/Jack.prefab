@@ -1282,10 +1282,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0a4e06c75243eea45807c5064e621921, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  minHunger: 15
+  minHunger: 20
   maxHunger: 100
   hungerUse: 0.5
-  minThirst: 10
+  minThirst: 12.5
   maxThirst: 50
   thirstUse: 0.3
   log: {fileID: 8057844629184554662}
