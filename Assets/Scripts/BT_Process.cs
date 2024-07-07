@@ -37,7 +37,6 @@ namespace BT.Process
         /// <returns></returns>
         public virtual Node.Status Process()
         {
-            int i = 0;
             status = Node.Status.Success;
             if (decorators.Count > 0)
             {
@@ -49,13 +48,9 @@ namespace BT.Process
                     {
                         return _DecProcess;
                     }
-                    i++;
+                    _Decorator.Reset();
                 }
 
-                if(i >= decorators.Count)
-                {
-                    return Node.Status.Success;
-                }
             } //else:
 
             return status;
@@ -99,6 +94,11 @@ namespace BT.Process
         // private variables:
         float lastDist;
 
+        bool failed;
+
+        public delegate void GiveITarget(ITarget value);
+        event GiveITarget giveOldTarget;
+
         //public GoTo_Process(List<ITarget> _Targets, NavMeshAgent _Agent, IDecorator _Decorator, float _StopDist,RemoveBar _RemoveBar ) : base()
         //{
         //    stopDist = _StopDist;
@@ -109,7 +109,7 @@ namespace BT.Process
         //    distance = distance
         //}
 
-        public GoTo_Process(GetITarget _GetTarget, NavMeshAgent _Agent, float _StopDist, GetFloat _GetDistance, RemoveBar _RemoveBar) : base()
+        public GoTo_Process(GetITarget _GetTarget, NavMeshAgent _Agent, float _StopDist, GetFloat _GetDistance, RemoveBar _RemoveBar, GiveITarget _GiveOldTarget) : base()
         {
             stopDist = _StopDist;
             getTarget = _GetTarget;
@@ -117,7 +117,7 @@ namespace BT.Process
             removeBar = _RemoveBar;
             decorators = new();
             getDistance = _GetDistance;
-
+            giveOldTarget = _GiveOldTarget;
         }
 
         /// <summary>
@@ -135,23 +135,49 @@ namespace BT.Process
             }
 
             // all decorations processes
-            status = base.Process();
 
-            if (status != Node.Status.Success)
-                return status;
-            else
+            if (decorators.Count > 0)
             {
-                target = getTarget?.Invoke();
-                Debug.Log("Successsssssss");
+                Node.Status _DecProcess = Node.Status.Failure;
+                foreach (var _Decorator in decorators)
+                {
+                    _DecProcess = _Decorator.Process();
+
+                    if (_DecProcess != Node.Status.Success)
+                    {
+                        return _DecProcess;
+                    }
+                }
+                giveOldTarget?.Invoke(target);
+                agent.SetDestination(target.MyGameObject.transform.position);
+                
             }
-           
+
+
+
+            //if (status != Node.Status.Success)
+            //{
+            //    failed = true;
+            //    return status;
+            // -
+            //}
+            //else if (failed)
+            //    return Node.Status.Success;
+            // ----
+            //else
+            //{
+            //    target = getTarget?.Invoke();
+            //    Debug.Log("Successsssssss");
+            //}
+
+
 
             Vector3 agentPos = agent.transform.position;
             agentPos.y = 0;
             Vector3 targetPos = target.MyGameObject.transform.position;
             targetPos.y = 0;
 
-            distance = Vector3.Distance (agentPos,targetPos);
+            distance = Vector3.Distance(agentPos, targetPos);
 
             //Debug.LogError(Vector3.Distance(target.MyGameObject.transform.position, agent.transform.position) + "\n" + distance);
             //if (distance <= 0)
@@ -165,8 +191,6 @@ namespace BT.Process
                 removeBar?.Invoke();
             }
 
-            Debug.LogWarning(distance + "\n" + stopDist);
-
             if (distance <= stopDist)
                 status = Node.Status.Success;
             else
@@ -179,6 +203,7 @@ namespace BT.Process
         {
             target = null;
             distance = 0;
+            failed = false;
 
             base.Reset();
         }
@@ -193,20 +218,20 @@ namespace BT.Process
     {
         float duration;
         public delegate void Task();
-        event Task task;
+        event Task taskOver;
 
         float timer;
 
         public PerformingTask_Process(float _Duration) : base()
         {
             duration = _Duration;
-            task = null;
+            taskOver = null;
         }
 
-        public PerformingTask_Process(float _Duration, Task _Task) : base()
+        public PerformingTask_Process(float _Duration, Task _TaskOver) : base()
         {
             duration = _Duration;
-            task = _Task;
+            taskOver = _TaskOver;
         }
 
         public override Node.Status Process()
@@ -221,7 +246,7 @@ namespace BT.Process
                 return Node.Status.Running;
             }
 
-            task?.Invoke(); // ex: if jack eats he will restore to the full hunger bar 
+            taskOver?.Invoke(); // ex: if jack eats he will restore to the full hunger bar 
 
             return Node.Status.Success;
         }
@@ -233,6 +258,23 @@ namespace BT.Process
         public override void Reset()
         {
             timer = 0;
+            base.Reset();
+        }
+    }
+
+    public class Idle : BaseProcess
+    {
+        public override Node.Status Process()
+        {
+            return Node.Status.Running;
+
+        }
+        public override void AddDecorator(IDecorator _Decorator)
+        {
+        }
+
+        public override void Reset()
+        {
             base.Reset();
         }
     }

@@ -1,20 +1,16 @@
-using BT;
+﻿using BT;
 using BT.Decorator;
 using BT.Process;
-using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 
-public class JackTree: MonoBehaviour
+public class JackTree : MonoBehaviour
 {
-    [Header("static points")]
     ITarget homePoint;  // sleep
-    ITarget foodPoint;  // eat
+    List<ITarget> foodPoints = new();  // eat
     ITarget waterPoint; // drink
     ITarget stackPoint; // stack
-    [SerializeField] GameObject log;
-
     List<ITarget> trees = new();
 
     [Header("Hunger Settings:")]
@@ -28,6 +24,7 @@ public class JackTree: MonoBehaviour
     [SerializeField] public float thirstUse;
 
     [Header("Process Settings:")]
+    [SerializeField] GameObject log;
     [SerializeField] float stopDist;
     [SerializeField] float eatDur;
     [SerializeField] float drinkDur;
@@ -46,16 +43,39 @@ public class JackTree: MonoBehaviour
     Node.Status treeStatus = Node.Status.Running;
 
     Jack jack;
-    
+
+
     private void Awake()
     {
         agent = GetComponent<NavMeshAgent>();
         trees.AddRange(FindObjectsOfType<Tree>());
+        foodPoints.AddRange(FindObjectsOfType<Food>());
         stackPoint = FindObjectOfType<StackObj>();
         waterPoint = FindObjectOfType<Water>();
-        foodPoint = FindObjectOfType<Food>();
         homePoint = FindObjectOfType<Home>();
         jack = GetComponent<Jack>();
+    }
+
+    private void OnEnable()
+    {
+        Clock.OnTimeChange += TimeChanged;
+    }
+
+    private void OnDisable()
+    {
+        Clock.OnTimeChange -= TimeChanged;
+    }
+
+    private void TimeChanged()
+    {
+        currentTree.Reset();
+
+        if (Clock.IsDay)
+            currentTree = treeDay;
+        else
+            currentTree = treeNight;
+
+        currentTree.Reset();
     }
 
     private void Start()
@@ -77,42 +97,53 @@ public class JackTree: MonoBehaviour
 
     private void InizializeBT()
     {
+        // gl mr venice no 30 (;﹏;)
+
         //sequences:
         treeDay = new("day tree (Jack: i won't cut this one) ");
         treeNight = new("night tree (Jack: i felling eppy)");
 
+        //Selectors:
+        Selector hasToDropLog = new("has to drop log?");
+
+        //Sequences: 
         Sequence daySequence = new("day sequence");
         Sequence nightSequence = new("night sequence");
-        Sequence foodSequence = new("Food Sequence (Jack: i got to eat man)");
+        Sequence eatSequence = new("Food Sequence (Jack: i got to eat man)");
         Sequence drinkSequence = new("Drink sequence (Jack: i'm thirsty *coff* *coff*)");
+        Sequence dropLogSequence = new("Dropping log");
+        Sequence dontDropLogSequence = new("skip log");
+
         #region distance calulations:
 
         //distance calulators:
         CalculateDistance_Decorator distanceToTree = new(GetDistance, GetTarget, trees, agent);
-        CalculateDistance_Decorator distanceFromFood = new(GetDistance, GetTarget, foodPoint, agent);
+        CalculateShortestDistance_Decorator distanceFromFood = new(GetDistance, GetTarget, foodPoints, agent);
         CalculateDistance_Decorator distanceFromWater = new(GetDistance, GetTarget, waterPoint, agent);
 
         //Distance Leafs:
         Leaf leaf_DistanceToTree = new("Calculate Distance", distanceToTree);
-        Leaf leaf_DistanceToFood = new("Calculate Distance", distanceFromFood);
+        Leaf leaf_ShortestDistanceToFood = new("Calculate Distance", distanceFromFood);
         Leaf leaf_DistanceToWater = new("Calculate Distance", distanceFromWater);
 
         #endregion
 
         //Bars check:
-        CheckBar_Decorator hungerCheck = new(() => currentHunger, minHunger, () => distance, hungerUse, foodSequence);
-        CheckBar_Decorator thirstCheck = new(() => currentThirst, minThirst, () => distance, hungerUse, foodSequence);
+        CheckBar_Decorator hungerCheck = new(() => currentHunger, minHunger, () => distance, hungerUse, eatSequence);
+        CheckBar_Decorator thirstCheck = new(() => currentThirst, minThirst, () => distance, hungerUse, drinkSequence);
 
 
         #region GoTo:
         //GoTo:
-        GoTo_Process goToTree = new(() => target, agent, stopDist, () => distance, DecreaseBars);
+        GoTo_Process goToTree = new(() => target, agent, stopDist, () => distance, DecreaseBars, GetTarget);
         goToTree.AddDecorator(hungerCheck); goToTree.AddDecorator(thirstCheck);
-        GoTo_Process goToFood = new(() => foodPoint, agent, stopDist, () => distance, DecreaseBars);
-        GoTo_Process goToWater = new(() => waterPoint, agent, stopDist, () => distance, DecreaseBars);
-        GoTo_Process goToStack = new(() => stackPoint, agent, stopDist, () => distance, DecreaseBars);
-        GoTo_Process goToHome = new(() => homePoint, agent, stopDist, () => distance, DecreaseBars);
-        //goToHome.AddDecorator(hungerCheck); goToHome.AddDecorator(thirstCheck);
+        GoTo_Process goToFood = new(() => target, agent, stopDist, () => distance, DecreaseBars, GetTarget);
+        GoTo_Process goToWater = new(() => waterPoint, agent, stopDist, () => distance, DecreaseBars, GetTarget);
+        GoTo_Process goToStack = new(() => stackPoint, agent, stopDist, () => distance, DecreaseBars, GetTarget);
+        GoTo_Process goToSatckDecorated = new(() => stackPoint, agent, stopDist, () => distance, DecreaseBars, GetTarget);
+        goToSatckDecorated.AddDecorator(new Check (()=> hasLog));
+        GoTo_Process goToHome = new(() => homePoint, agent, stopDist, () => distance, DecreaseBars, GetTarget);
+        goToHome.AddDecorator(hungerCheck); goToHome.AddDecorator(thirstCheck);
 
         //GoTo leafs:
         Leaf leaf_GoToTree = new("Going to tree", goToTree);
@@ -120,6 +151,7 @@ public class JackTree: MonoBehaviour
         Leaf leaf_GoToWater = new("Going to drink", goToWater);
         Leaf leaf_GoToHome = new("Going home", goToHome);
         Leaf leaf_GoToStack = new("Go to stack", goToStack);
+        Leaf leaf_GoToStackDecorated = new("go to stack if has log", goToSatckDecorated);
         #endregion
 
         #region PerformTask:
@@ -128,12 +160,14 @@ public class JackTree: MonoBehaviour
         PerformingTask_Process eat = new(eatDur, OnEating);
         PerformingTask_Process drink = new(drinkDur, OnDrink);
         PerformingTask_Process dropLog = new(0.1f, OnDropLog);
+        PerformingTask_Process sleep = new(0.1f, Sleep);
 
-        //Performing task leafs:
+        //Performing taskOver leafs:
         Leaf leaf_CutTree = new("cutting tree", cutTree);
         Leaf leaf_DropLog = new("drop log", dropLog);
         Leaf leaf_Eat = new("Eating", eat);
         Leaf leaf_Drink = new("Drinking", drink);
+        Leaf leaf_Sleep = new("Sleeping", sleep);
         #endregion
 
         //Day sequence:
@@ -147,10 +181,10 @@ public class JackTree: MonoBehaviour
 
 
         //Food sequence:
-        foodSequence.AddChild(leaf_DistanceToFood);
-        foodSequence.AddChild(leaf_GoToFood);
-        foodSequence.AddChild(leaf_Eat);
-        foodSequence.AddChild(leaf_DistanceToTree);
+        eatSequence.AddChild(leaf_ShortestDistanceToFood);
+        eatSequence.AddChild(leaf_GoToFood);
+        eatSequence.AddChild(leaf_Eat);
+        eatSequence.AddChild(leaf_DistanceToTree);
 
 
 
@@ -159,7 +193,32 @@ public class JackTree: MonoBehaviour
         drinkSequence.AddChild(leaf_GoToWater);
         drinkSequence.AddChild(leaf_Drink);
         drinkSequence.AddChild(leaf_DistanceToTree);
+
+
+        // night sequence:
+        Leaf leaf_Nothing = new("nothing", new Idle());
+
+        dropLogSequence.AddChild(leaf_GoToStackDecorated);
+        dropLogSequence.AddChild(leaf_DropLog);
+        dropLogSequence.AddChild(nightSequence);
+
+        treeNight.AddChild(hasToDropLog);
+
+        hasToDropLog.AddChild(dropLogSequence);
+        hasToDropLog.AddChild(nightSequence);
+
+
+        nightSequence.AddChild(leaf_GoToHome);
+        nightSequence.AddChild(leaf_Sleep);
+        nightSequence.AddChild(leaf_Nothing);
+
+
         currentTree = treeDay;
+    }
+
+    private void Sleep()
+    {
+
     }
 
     private void OnDropLog()
@@ -180,6 +239,7 @@ public class JackTree: MonoBehaviour
 
     private void OnEating()
     {
+        target.Interact();
         currentHunger = maxHunger;
         jack.jackSo.barChanged?.Invoke();
     }
@@ -188,9 +248,7 @@ public class JackTree: MonoBehaviour
     {
         hasLog = true;
         log.SetActive(true);
-
-        target?.Interact();
-
+        target.Interact();
     }
 
     private void DecreaseBars()
@@ -198,19 +256,18 @@ public class JackTree: MonoBehaviour
         currentHunger -= hungerUse;
         currentThirst -= thirstUse;
         jack.jackSo.barChanged?.Invoke();
-        if(currentHunger <= 0 || currentThirst <= 0)
+        if (currentHunger <= 0 || currentThirst <= 0)
         {
-            
+            jack.jackSo.ohIMDie?.Invoke();
         }
     }
 
     private void GetTarget(ITarget _Target)
     {
-        //add line?
+        //add anim?
         //add sound? 
         //add my will to live? 
         target = _Target;
-        //Debug.LogWarning(target.MyGameObject.name, target.MyGameObject);
     }
 
     private void GetDistance(float value)

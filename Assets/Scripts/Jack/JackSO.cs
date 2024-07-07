@@ -6,4 +6,5 @@ public class JackSO : ScriptableObject
 {
     public Action barChanged;
     public Action ohIMDie;
+    public Action<ITarget> GetTarget;
 }

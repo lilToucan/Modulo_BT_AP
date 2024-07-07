@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using BT.Process;
 
+
 namespace BT
 {
     public class Node
@@ -110,6 +111,7 @@ namespace BT
         }
     }
 
+
     public class Selector : Node
     {
         public Selector(string _Name) : base(_Name)
@@ -154,11 +156,6 @@ namespace BT
 
         public override Status Process()
         {
-            var processStatus = MyProcess.Process();
-            if (processStatus == Status.Success)
-            {
-                Debug.Log("H");
-            }
             return MyProcess.Process();
         }
 

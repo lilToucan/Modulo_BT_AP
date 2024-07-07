@@ -7,6 +7,9 @@ public class JackBars : MonoBehaviour
     [SerializeField] Image hungerBar;
     [SerializeField] Image thirstBar;
 
+    [SerializeField] Image minHunger;
+    [SerializeField] Image minThirst;
+
     JackTree jackTree;
     Jack jack;
     private void Awake()
@@ -17,6 +20,8 @@ public class JackBars : MonoBehaviour
 
     private void OnEnable()
     {
+        minHunger.fillAmount = jackTree.minHunger / jackTree.maxHunger;
+        minThirst.fillAmount = jackTree.minThirst / jackTree.maxThirst;
         jack.jackSo.barChanged += UpdateBars;
     }
     private void OnDisable()
@@ -28,5 +33,13 @@ public class JackBars : MonoBehaviour
     {
         hungerBar.fillAmount = jackTree.currentHunger/jackTree.maxHunger;
         thirstBar.fillAmount = jackTree.currentThirst/jackTree.maxThirst;
+
+#if UNITY_EDITOR
+        minHunger.fillAmount = jackTree.minHunger / jackTree.maxHunger;
+        minThirst.fillAmount = jackTree.minThirst / jackTree.maxThirst;
+#endif
+
     }
+
+
 }

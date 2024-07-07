@@ -48,10 +48,13 @@ namespace BT.Decorator
             if (cantReach)
             {
                 var nodeStatus = NodeNullCheck();
-                if (nodeStatus == Node.Status.Success)
-                    Debug.Log("aaaaaaaaaaaaa");
-
-                return nodeStatus;
+                if (nodeStatus != Node.Status.Success)
+                {
+                    return nodeStatus;
+                }
+                // if success: 
+                cantReach = false;
+                return Node.Status.Success;
             }
 
             if (fistTime)
@@ -75,6 +78,7 @@ namespace BT.Decorator
                 return Node.Status.Running;
             }
             //else 
+            Reset();
             return Node.Status.Success;
         }
 
@@ -95,6 +99,7 @@ namespace BT.Decorator
             totBareUsed = 0;
             fistTime = true;
             cantReach = false;
+            node?.Reset();
         }
     }
 
@@ -107,6 +112,7 @@ namespace BT.Decorator
         List<ITarget> targets = new();
         ITarget target = null;
         NavMeshAgent agent;
+        public List<IDecorator> decorators { get; set; }
 
 
         public CalculateDistance_Decorator(GiveDistance _GiveDistance, GiveTarget _GiveTarget, List<ITarget> _Targets, NavMeshAgent _Agent)
@@ -123,12 +129,10 @@ namespace BT.Decorator
         {
             giveDistance = _GiveDistance;
             giveTarget = _GiveTarget;
-            targets = new();
-            targets.Add(_Target);
+            targets = new() { _Target };
             agent = _Agent;
         }
 
-        public List<IDecorator> decorators { get; set; }
 
         public void AddDecorator(IDecorator _Decorator)
         { }
@@ -140,7 +144,6 @@ namespace BT.Decorator
 
             if (target == null)
             {
-
                 int rand = Random.Range(0, targets.Count);
                 if (targets[rand].MeshRenderer != null)
                 {
@@ -152,24 +155,22 @@ namespace BT.Decorator
                 }
 
                 target = targets[rand];
-                //Debug.Log(target.MyGameObject.name, target.MyGameObject);
+
+                if (target == null)
+                {
+                    return Node.Status.Failure;
+                }
             }
 
-            if (target == null)
-            {
-                return Node.Status.Failure;
-            }
 
             giveTarget?.Invoke(target);
 
-            agent.SetDestination(target.MyGameObject.transform.position);
             Vector3 agentPos = agent.transform.position;
             agentPos.y = 0;
             Vector3 targetPos = target.MyGameObject.transform.position;
             targetPos.y = 0;
 
             var dist = Vector3.Distance(agentPos, targetPos); ;
-            agent.SetDestination(agent.transform.position);
 
             giveDistance?.Invoke(dist);
 
@@ -179,6 +180,119 @@ namespace BT.Decorator
         public void Reset()
         {
             target = null;
+        }
+    }
+
+    public class CalculateShortestDistance_Decorator : IDecorator
+    {
+        public delegate void GiveDistance(float value);
+        public delegate void GiveTarget(ITarget target);
+        event GiveDistance giveDistance;
+        event GiveTarget giveTarget;
+        List<ITarget> targets = new();
+        ITarget target = null;
+        NavMeshAgent agent;
+        public List<IDecorator> decorators { get; set; }
+
+
+        public CalculateShortestDistance_Decorator(GiveDistance _GiveDistance, GiveTarget _GiveTarget, List<ITarget> _Targets, NavMeshAgent _Agent)
+        {
+            giveDistance = _GiveDistance;
+            giveTarget = _GiveTarget;
+
+            targets = new();
+            targets = _Targets;
+            agent = _Agent;
+        }
+
+        public CalculateShortestDistance_Decorator(GiveDistance _GiveDistance, GiveTarget _GiveTarget, ITarget _Target, NavMeshAgent _Agent)
+        {
+            giveDistance = _GiveDistance;
+            giveTarget = _GiveTarget;
+            targets = new() { _Target };
+            agent = _Agent;
+        }
+
+
+        public void AddDecorator(IDecorator _Decorator)
+        { }
+
+        public Node.Status Process()
+        {
+            if (targets.Count <= 0)
+                return Node.Status.Failure;
+
+            float minDist = 999;
+            
+            if (target == null)
+            {
+                foreach (ITarget _Target in targets)
+                {
+                    if (_Target.MeshRenderer != null)
+                        if (_Target.MeshRenderer.enabled == false)
+                            continue;
+
+                    var _TargPos = _Target.MyGameObject.transform.position;
+                    var _AgentPos = agent.transform.position;
+                    _TargPos.y = 0;
+                    _AgentPos.y = 0;
+
+                    var dist = Vector3.Distance(_AgentPos, _TargPos);
+                    if (dist < minDist)
+                    {
+                        target = _Target;
+                        minDist = dist;
+                    }
+                }
+
+                if (target == null)
+                {
+                    Debug.Log(minDist);
+                    return Node.Status.Failure;
+                }
+            }
+
+
+            giveTarget?.Invoke(target);
+            giveDistance?.Invoke(minDist);
+
+            return Node.Status.Success;
+        }
+
+        public void Reset()
+        {
+            target = null;
+        }
+    }
+
+    public class Check : IDecorator
+    {
+        public List<IDecorator> decorators { get; set; }
+        public delegate bool GetBool();
+        event GetBool getBool;
+
+
+        public Check(GetBool _GetBool)
+        {
+            getBool = _GetBool;
+        }
+
+        public void AddDecorator(IDecorator _Decorator)
+        {
+
+        }
+
+        public Node.Status Process()
+        {
+            if ((bool)getBool?.Invoke())
+                return Node.Status.Success;
+            else
+                return Node.Status.Failure;
+        }
+
+        public void Reset()
+        {
+
         }
     }
 }
